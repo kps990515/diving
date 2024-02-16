@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Form</title>
+</head>
+<body>
+
+<form id="signatureForm">
+    <p>이름: <span id="signerName" th:text="${signerName}"></span></p>
+
+    <canvas id="signatureCanvas" width="400" height="200" style="border:1px solid #000;"></canvas>
+    <button type="button" onclick="generateAndSavePdf(event)">Save as PDF</button>
+</form>
+
+<script>
+    var canvas = document.getElementById('signatureCanvas');
+    var ctx = canvas.getContext('2d');
+    var isDrawing = false;
+
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+
+    function startDrawing(e) {
+        isDrawing = true;
+        draw(e);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault(); // 페이지 스크롤 방지
+
+        var rect = canvas.getBoundingClientRect(); // 캔버스의 위치 정보 가져오기
+        var x, y;
+
+        // 터치 이벤트와 마우스 이벤트를 구분하여 처리
+        if (e.touches) { // 터치 이벤트인 경우
+            x = e.touches[0].clientX - rect.left;
+            y = e.touches[0].clientY - rect.top;
+        } else { // 마우스 이벤트인 경우
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+        }
+
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath(); // 새로운 서명을 위해 경로를 초기화
+    }
+
+    function generateAndSavePdf(e) {
+        e.preventDefault(); // 폼의 기본 제출 동작을 방지
+
+        // Canvas에 그려진 이미지를 Base64로 인코딩
+        var imageData = canvas.toDataURL('image/png');
+        var base64Data = imageData.replace(/^data:image\/png;base64,/, "");
+        var signerName = document.getElementById('signerName').textContent;
+
+        // 서버로 이미지 데이터 및 signerName을 전송 (AJAX 사용)
+        fetch('/sign-pdf/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ signerName: signerName, signatureImageBase64: base64Data }),
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            // PDF 파일 다운로드 링크 생성
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'signed-document.pdf';
+
+            // 링크를 클릭하여 다운로드
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+
+</body>
+</html>
