@@ -1,24 +1,85 @@
 package com.diving.prototype;
 
 public class SignatureData {
-    private String signerName;
-    private String signatureImageBase64;
+    private String code;
+    private String studentName;
+    private String birthDate; // Date of Birth as String; consider using LocalDate for actual date handling
+    private String gender;
+    private String licenseLevel;
+    private String mobile;
+    private String email;
+    private String pdfFile;
+    private String instructorName;
 
-    // Getter, Setter, 생성자 등 필요한 메서드 추가
-
-    public String getSignerName() {
-        return signerName;
+    public String getCode() {
+        return code;
     }
 
-    public void setSignerName(String signerName) {
-        this.signerName = signerName;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getSignatureImageBase64() {
-        return signatureImageBase64;
+    public String getStudentName() {
+        return studentName;
     }
 
-    public void setSignatureImageBase64(String signatureImageBase64) {
-        this.signatureImageBase64 = signatureImageBase64;
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getLicenseLevel() {
+        return licenseLevel;
+    }
+
+    public void setLicenseLevel(String licenseLevel) {
+        this.licenseLevel = licenseLevel;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPdfFile() {
+        return pdfFile;
+    }
+
+    public void setPdfFile(String pdfFile) {
+        this.pdfFile = pdfFile;
+    }
+
+    public String getInstructorName() {
+        return instructorName;
+    }
+
+    public void setInstructorName(String instructorName) {
+        this.instructorName = instructorName;
     }
 }

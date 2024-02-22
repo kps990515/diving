@@ -26,22 +26,17 @@ import java.io.IOException;
 @RequestMapping("/sign-pdf")
 public class PdfController {
 
-    @GetMapping("/form")
-    public String showSignatureForm(@RequestParam(name = "code", required = false) String code, Model model) {
-        // 코드가 없거나 유효하지 않은 경우 홈 페이지로 리다이렉트
-        if (code == null || !isValidCode(code)) {
-            return "redirect:/";
-        }
-
-        if(code.equals("1234")){
-            model.addAttribute("signerName", "김재호");
-        }
+    @PostMapping("/form")
+    public String showSignatureForm(@ModelAttribute SignatureData data, Model model) {
+        data.setInstructorName("김재호");
+        data.setPdfFile("/pdf/" + data.getPdfFile() + "1.jpg");
+        model.addAttribute("signatureData", data);
         return "signature-form";
     }
 
     @PostMapping("/generate")
     @ResponseBody
-    public ResponseEntity<byte[]> generateAndSavePdf(@RequestBody SignatureData signatureData) {
+    public ResponseEntity<byte[]> generateAndSavePdf(@RequestBody String imageBase64) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
@@ -49,18 +44,10 @@ public class PdfController {
             // 폰트 로드
             PDType0Font font = PDType0Font.load(document, PdfController.class.getResourceAsStream("/fonts/NotoSansKR-Medium.ttf"));
 
-
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                // PDF에 서명 정보 추가하는 로직
-                contentStream.beginText();
-                contentStream.setFont(font, 12); // 유니코드 폰트 설정
-                contentStream.newLineAtOffset(50, 700);
-                contentStream.showText(signatureData.getSignerName()); // 한글 텍스트 표시
-                contentStream.endText();
-
                 // 서명 이미지를 Base64 디코딩하여 추가
-                if (signatureData.getSignatureImageBase64() != null && !signatureData.getSignatureImageBase64().isEmpty()) {
-                    byte[] decodedImage = java.util.Base64.getDecoder().decode(signatureData.getSignatureImageBase64());
+                if (imageBase64 != null && !imageBase64.isEmpty()) {
+                    byte[] decodedImage = java.util.Base64.getDecoder().decode(imageBase64);
 
                     // PDF에 이미지 추가
                     PDImageXObject pdImage = PDImageXObject.createFromByteArray(document, decodedImage, "signature");
